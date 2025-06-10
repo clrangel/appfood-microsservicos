@@ -23,6 +23,7 @@ public class PagamentoService {
 
     @Autowired
     private ModelMapper modelMapper;
+    
 
     public Page<PagamentoDto> obterTodos(Pageable paginacao) {
         return repository
