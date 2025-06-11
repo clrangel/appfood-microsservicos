@@ -2,6 +2,7 @@ package br.com.appfodd.ms_pedidos.service;
 
 import br.com.appfodd.ms_pedidos.dto.PedidoDto;
 import br.com.appfodd.ms_pedidos.model.Pedido;
+import br.com.appfodd.ms_pedidos.model.Status;
 import br.com.appfodd.ms_pedidos.repository.PedidoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +33,17 @@ public class PedidoService {
     public PedidoDto obterPorId(Long id) {
         Pedido pedido = repository.findById(id)
                 .orElseThrow(EntityNotFoundException::new);
+
+        return modelMapper.map(pedido, PedidoDto.class);
+    }
+
+    public PedidoDto criarPedido(PedidoDto dto) {
+        Pedido pedido = modelMapper.map(dto, Pedido.class);
+
+        pedido.setDataHora(LocalDateTime.now());
+        pedido.setStatus(Status.REALIZADO);
+        pedido.getItens().forEach(item -> item.setPedido(pedido));
+        Pedido salvo = repository.save(pedido);
 
         return modelMapper.map(pedido, PedidoDto.class);
     }
