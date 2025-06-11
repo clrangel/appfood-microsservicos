@@ -61,4 +61,16 @@ public class PedidoService {
         repository.atualizaStatus(dto.getStatus(), pedido);
         return modelMapper.map(pedido, PedidoDto.class);
     }
+
+    public void aprovaPagamentoPedido(Long id) {
+
+        Pedido pedido = repository.porIdComItens(id);
+
+        if (pedido == null) {
+            throw new EntityNotFoundException();
+        }
+
+        pedido.setStatus(Status.PAGO);
+        repository.atualizaStatus(Status.PAGO, pedido);
+    }
 }
