@@ -1,6 +1,7 @@
 package br.com.appfodd.ms_pedidos.controller;
 
 import br.com.appfodd.ms_pedidos.dto.PedidoDto;
+import br.com.appfodd.ms_pedidos.dto.StatusDto;
 import br.com.appfodd.ms_pedidos.service.PedidoService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -39,5 +40,12 @@ public class PedidoController {
 
         return ResponseEntity.created(endereco).body(pedidoRealizado);
 
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<PedidoDto> atualizaStatus(@PathVariable Long id, @RequestBody StatusDto status){
+        PedidoDto dto = service.atualizaStatus(id, status);
+
+        return ResponseEntity.ok(dto);
     }
 }

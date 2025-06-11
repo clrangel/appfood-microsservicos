@@ -1,6 +1,7 @@
 package br.com.appfodd.ms_pedidos.service;
 
 import br.com.appfodd.ms_pedidos.dto.PedidoDto;
+import br.com.appfodd.ms_pedidos.dto.StatusDto;
 import br.com.appfodd.ms_pedidos.model.Pedido;
 import br.com.appfodd.ms_pedidos.model.Status;
 import br.com.appfodd.ms_pedidos.repository.PedidoRepository;
@@ -45,6 +46,19 @@ public class PedidoService {
         pedido.getItens().forEach(item -> item.setPedido(pedido));
         Pedido salvo = repository.save(pedido);
 
+        return modelMapper.map(pedido, PedidoDto.class);
+    }
+
+    public PedidoDto atualizaStatus(Long id, StatusDto dto) {
+
+        Pedido pedido = repository.porIdComItens(id);
+
+        if (pedido == null) {
+            throw new EntityNotFoundException();
+        }
+
+        pedido.setStatus(dto.getStatus());
+        repository.atualizaStatus(dto.getStatus(), pedido);
         return modelMapper.map(pedido, PedidoDto.class);
     }
 }
