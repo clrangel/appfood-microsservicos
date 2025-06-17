@@ -6,6 +6,7 @@ import br.com.appfodd.ms_pedidos.service.PedidoService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -30,6 +31,13 @@ public class PedidoController {
         PedidoDto dto = service.obterPorId(id);
 
         return  ResponseEntity.ok(dto);
+    }
+
+    //Confere se está distribuindo as requisições.
+    @GetMapping("/response")
+    public String obterPorta(@Value("${local.server.port}") String porta) {
+        return String.format("Resposta vinda da porta %s", porta);
+
     }
 
     @PostMapping()
