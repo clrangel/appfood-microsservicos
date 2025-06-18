@@ -1,6 +1,8 @@
 package br.com.appfood.ms_pagamentos.service;
 
+import br.com.appfood.ms_pagamentos.dto.AutorizacaoDto;
 import br.com.appfood.ms_pagamentos.dto.PagamentoDto;
+import br.com.appfood.ms_pagamentos.model.GeradorAutorizacao;
 import br.com.appfood.ms_pagamentos.model.Pagamento;
 import br.com.appfood.ms_pagamentos.model.Status;
 import br.com.appfood.ms_pagamentos.repository.PagamentoRepository;
@@ -36,6 +38,15 @@ public class PagamentoService {
                 .orElseThrow(() -> new EntityNotFoundException());
 
         return modelMapper.map(pagamento, PagamentoDto.class);
+    }
+
+    public AutorizacaoDto autorizarPagamento(Long id) {
+        Pagamento pagamento = new Pagamento();
+        pagamento.setPedidoId(id);
+        Status status = Status.valueOf(GeradorAutorizacao.getRandomBoolean() ? "Autorizado" : "Recusado");
+        pagamento.setStatus(status);
+        repository.save(pagamento);
+        return new AutorizacaoDto(pagamento.getId(), pagamento.getStatus());
     }
 
     public PagamentoDto criarPagamento(PagamentoDto dto) {

@@ -1,5 +1,6 @@
 package br.com.appfood.ms_pagamentos.controller;
 
+import br.com.appfood.ms_pagamentos.dto.AutorizacaoDto;
 import br.com.appfood.ms_pagamentos.dto.PagamentoDto;
 import br.com.appfood.ms_pagamentos.service.PagamentoService;
 import jakarta.validation.Valid;
@@ -30,6 +31,11 @@ public class PagamentoController {
     public ResponseEntity<PagamentoDto> detalhar(@PathVariable @NotNull Long id) {
         PagamentoDto dto = service.obterPorId(id);
         return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/autorizacao/{id}")
+    public AutorizacaoDto obterAutorizacaoPagamento(@PathVariable Long id) {
+        return service.autorizarPagamento(id);
     }
 
     @PostMapping
