@@ -1,10 +1,12 @@
 package br.com.appfodd.ms_pedidos.service;
 
+import br.com.appfodd.ms_pedidos.dto.AutorizacaoDto;
 import br.com.appfodd.ms_pedidos.dto.PedidoDto;
 import br.com.appfodd.ms_pedidos.dto.StatusDto;
 import br.com.appfodd.ms_pedidos.model.Pedido;
 import br.com.appfodd.ms_pedidos.model.Status;
 import br.com.appfodd.ms_pedidos.repository.PedidoRepository;
+import br.com.appfodd.ms_pedidos.utils.AutorizacaoPagamentoClient;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -25,6 +27,9 @@ public class PedidoService {
     @Autowired
     private final ModelMapper modelMapper;
 
+    @Autowired
+    private final AutorizacaoPagamentoClient client;
+
     public List<PedidoDto> obterTodos() {
         return repository.findAll().stream()
                 .map(p -> modelMapper.map(p, PedidoDto.class))
@@ -38,13 +43,28 @@ public class PedidoService {
         return modelMapper.map(pedido, PedidoDto.class);
     }
 
+    private Status obterStatusPagamento(String id) {
+        AutorizacaoDto autorizacao = client.obterAutorizacao(id);
+        if (autorizacao.status().equals("autorizado")) {
+            return Status.PREPARANDO;
+        }
+
+        return Status.NAO_AUTORIZADO;
+    }
+
     public PedidoDto criarPedido(PedidoDto dto) {
         Pedido pedido = modelMapper.map(dto, Pedido.class);
+
+        Status status = Status.AGUARDANDO_PAGAMENTO;
 
         pedido.setDataHora(LocalDateTime.now());
         pedido.setStatus(Status.REALIZADO);
         pedido.getItens().forEach(item -> item.setPedido(pedido));
         Pedido salvo = repository.save(pedido);
+
+        status = obterStatusPagamento(pedido.getId().toString());
+        pedido.setStatus(status);
+        repository.save(pedido);
 
         return modelMapper.map(pedido, PedidoDto.class);
     }
