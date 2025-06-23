@@ -52,7 +52,7 @@ public class PedidoService {
         return Status.NAO_AUTORIZADO;
     }
 
-    public PedidoDto criarPedido(PedidoDto dto) {
+    public PedidoDto criarPedido(PedidoDto dto, Boolean comErro) {
         Pedido pedido = modelMapper.map(dto, Pedido.class);
 
         Status status = Status.AGUARDANDO_PAGAMENTO;
@@ -61,8 +61,13 @@ public class PedidoService {
         pedido.setStatus(Status.REALIZADO);
         pedido.getItens().forEach(item -> item.setPedido(pedido));
         Pedido salvo = repository.save(pedido);
-
         status = obterStatusPagamento(pedido.getId().toString());
+        if (comErro) {
+            status = Status.ERRO_CONSULTA_PGTO;
+        } else {
+            status = obterStatusPagamento(pedido.getId().toString());
+        }
+
         pedido.setStatus(status);
         repository.save(pedido);
 

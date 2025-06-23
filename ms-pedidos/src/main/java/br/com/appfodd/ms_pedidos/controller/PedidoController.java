@@ -3,10 +3,12 @@ package br.com.appfodd.ms_pedidos.controller;
 import br.com.appfodd.ms_pedidos.dto.PedidoDto;
 import br.com.appfodd.ms_pedidos.dto.StatusDto;
 import br.com.appfodd.ms_pedidos.service.PedidoService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -41,13 +43,18 @@ public class PedidoController {
     }
 
     @PostMapping()
+    @CircuitBreaker(name = "verificaAutorizacao", fallbackMethod = "erroAoCadastrarPedido")
     public ResponseEntity<PedidoDto> realizaPedido(@RequestBody @Valid PedidoDto dto, UriComponentsBuilder uriBuilder) {
-        PedidoDto pedidoRealizado = service.criarPedido(dto);
+        PedidoDto pedidoRealizado = service.criarPedido(dto, false);
 
         URI endereco = uriBuilder.path("/pedidos/{id}").buildAndExpand(pedidoRealizado.getId()).toUri();
 
         return ResponseEntity.created(endereco).body(pedidoRealizado);
 
+    }
+
+    public ResponseEntity<PedidoDto> erroAoCadastrarPedido(@RequestBody @Valid PedidoDto pedidoDto, Exception e) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.criarPedido(pedidoDto, true));
     }
 
     @PutMapping("/{id}/status")
